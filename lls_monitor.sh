@@ -6,24 +6,17 @@ echo "Starting LLS monitor with CPU limit $CPU_LIMIT%"
 echo "PID: $$"
 echo "--------------------------------------------------"
 
-if [ $(pgrep -cf "lls_monitor.sh") -gt 1 ]; then
-    SECURE_TMP=$(mktemp /tmp/lls_monitor.XXXXXX)
-    echo "Secure temp file allocated at: $SECURE_TMP"
-
+LOCK_FILE="/tmp/lls_monitor.lock"
+exec 9> "$LOCK_FILE"
+if ! flock -n 9; then
     echo "Error: LLS Monitor already running in background. Check background jobs"
-
-    rm -f "$SECURE_TMP"
-    echo "Cleaned up at $SECURE_TMP"
-
     exit 1
 fi
 
 cleanup() {
     echo "Termination signal. Shutting down-------"
     pkill -P $$
-
-    rm -f "$SECURE_TMP"
-    echo "Cleaned up at $SECURE_TMP"
+    rm -f "$LOCK_FILE"
     exit 0
 }
 
@@ -31,5 +24,11 @@ trap cleanup SIGINT SIGTERM
 
 while true; do
     echo "[$(date +'%H-%M-%S')] running diagnostics"
+
+    echo " -> Heavy Processes (>$CPU_LIMIT% CPU):"
+    ps aux | awk -v limit="$CPU_LIMIT" '$3 > limit { print "    PID:", $2, "| CPU%:", $3, "| CMD:", $11 }'
+    
+    echo "------------------------------------------------"
+
     sleep 5 
 done
