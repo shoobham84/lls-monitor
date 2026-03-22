@@ -26,9 +26,21 @@ trap cleanup SIGINT SIGTERM
 while true; do
     echo "[$(date +'%H-%M-%S')] running diagnostics"
 
-    echo " -> Heavy Processes (>$CPU_LIMIT% CPU):"
-
-    ps aux | awk -v limit="$CPU_LIMIT" '$3 > limit { print "    PID:", $2, "| CPU%:", $3, "| CMD:", $11 }'
+    awk -v limit="$CPU_LIMIT" '/^cpu / {
+        idle = $5;
+        total = 0;
+        for (i = 2; i<=NF; ++i) {
+            total += $i;
+        }
+        cpu_usage = 100*(1-(idle/total));
+        
+        if (cpu_usage > limit) {
+            printf "HIGH System CPU: %.1f%%\n", cpu_usage
+        }
+        else {
+            printf "System CPU: %.1f%%\n", cpu_usage
+        }
+    }' /proc/stat
     
     free -m | awk -v limit="$MEM_LIMIT" 'NR==2 {
         percent = $3/$2 * 100;
@@ -38,7 +50,7 @@ while true; do
         else {
             printf "System RAM: %.1f%%\n", percent
         }
-    }'
+    }' 
 
     echo "------------------------------------------------"
 
