@@ -7,9 +7,14 @@ echo "PID: $$"
 echo "--------------------------------------------------"
 
 if [ $(pgrep -cf "lls_monitor.sh") -gt 1 ]; then
-    SECURE_TMP=$(mktmp /tmp/lls_monitor.XXXXXX)
+    SECURE_TMP=$(mktemp /tmp/lls_monitor.XXXXXX)
     echo "Secure temp file allocated at: $SECURE_TMP"
+
     echo "Error: LLS Monitor already running in background. Check background jobs"
+
+    rm -f "$SECURE_TMP"
+    echo "Cleaned up at $SECURE_TMP"
+
     exit 1
 fi
 
