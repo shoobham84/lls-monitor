@@ -6,7 +6,8 @@ echo "Starting LLS monitor with CPU limit $CPU_LIMIT%"
 echo "PID: $$"
 echo "--------------------------------------------------"
 
-LOCK_FILE="/tmp/lls_monitor.lock"
+LOCK_FILE="$HOME/.lls_monitor.lock"
+
 exec 9> "$LOCK_FILE"
 if ! flock -n 9; then
     echo "Error: LLS Monitor already running in background. Check background jobs"
@@ -16,7 +17,6 @@ fi
 cleanup() {
     echo "Termination signal. Shutting down-------"
     pkill -P $$
-    rm -f "$LOCK_FILE"
     exit 0
 }
 
