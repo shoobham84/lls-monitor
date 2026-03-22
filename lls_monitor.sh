@@ -7,9 +7,12 @@ echo "Starting LLS monitor with CPU limit $CPU_LIMIT% and MEM limit $MEM_LIMIT%"
 echo "PID: $$"
 echo "--------------------------------------------------"
 
+
 LOCK_FILE="$HOME/.lls_monitor.lock"
 
 exec 9> "$LOCK_FILE"
+exec 2> /dev/null
+
 if ! flock -n 9; then
     echo "Error: LLS Monitor already running in background. Check background jobs"
     exit 1
