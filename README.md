@@ -1,3 +1,6 @@
+just a stupid bash script lol idk why I was so happy over it, anyways....
+# its better you ignore this repo lol, serves no purpose
+
 # LLS Resource Monitor
 
 Simple resource monitor written in ZSH to track live CPU and RAM usage. 
